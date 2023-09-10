@@ -1,15 +1,23 @@
 version: 2.1
 jobs:
-  blog_demo_deployment_process:
+  nest_demo_deployment_process:
     docker:
       - image: cimg/node:19.8.1
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+
     steps:
       - checkout
+
+      #new
+      - setup_remote_docker:
+          docker_layer_caching: true
+
       - run:
           name: npm update
           command: npm install
 
-      #new
       - run:
           name: install jest
           command: sudo npm install --save-dev jest ts-jest
@@ -17,7 +25,15 @@ jobs:
           name: run automated tests
           command: npm test
 
+      #new
+      - run:
+          name: Build and Push Docker Image
+          command: |
+            docker build -t $DOCKERHUB_USERNAME/nest-demo:latest .
+            docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD docker.io
+            docker push $DOCKERHUB_USERNAME/nest-demo:latest
 workflows:
   blog-demo:
     jobs:
-      - blog_demo_deployment_process
+      - nest_demo_deployment_process:
+          context: Edwin
