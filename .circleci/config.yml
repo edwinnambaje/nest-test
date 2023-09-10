@@ -1,18 +1,23 @@
 version: 2.1
-orbs:
-  node: circleci/node@4.7
 jobs:
-  build:
-    executor:
-      name: node/default
+  blog_demo_deployment_process:
+    docker:
+      - image: cimg/node:19.8.1
     steps:
       - checkout
-      - node/install-packages
       - run:
-          command: npm install
+          name: npm update
+          command: sudo npm install -g npm@latest
+
+      #new
       - run:
-          command: npm run test
+          name: install jest
+          command: sudo npm install --save-dev jest ts-jest
+      - run:
+          name: run automated tests
+          command: npm test
+
 workflows:
-  build:
+  blog-demo:
     jobs:
-      - build
+      - blog_demo_deployment_process
